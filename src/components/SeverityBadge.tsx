@@ -22,9 +22,9 @@ const severityConfig: Record<Severity, { bg: string; text: string; border: strin
     border: "border-success/20",
   },
   info: {
-    bg: "bg-primary/10",
-    text: "text-primary",
-    border: "border-primary/20",
+    bg: "bg-info/10",
+    text: "text-info",
+    border: "border-info/20",
   },
 };
 
