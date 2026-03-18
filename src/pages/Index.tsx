@@ -4,9 +4,12 @@ import { ScanInput } from "@/components/ScanInput";
 import { ScanTerminal } from "@/components/ScanTerminal";
 import { SecurityScore } from "@/components/SecurityScore";
 import { VulnerabilityCard } from "@/components/VulnerabilityCard";
+import { FeaturePills } from "@/components/FeaturePills";
+import { SeverityFilter } from "@/components/SeverityFilter";
+import { SeveritySummary } from "@/components/SeveritySummary";
 import { simulateScan } from "@/lib/scanner-engine";
-import { type ScanResult, type ScanLog } from "@/lib/scanner-types";
-import { Shield } from "lucide-react";
+import { type ScanResult, type ScanLog, type Severity } from "@/lib/scanner-types";
+import { Shield, Clock, Globe, Activity } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,12 +29,14 @@ const Index = () => {
   const [logs, setLogs] = useState<ScanLog[]>([]);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<Severity | "all">("all");
 
   const handleScan = useCallback(async (url: string) => {
     setIsScanning(true);
     setLogs([]);
     setProgress(0);
     setResult(null);
+    setSeverityFilter("all");
 
     const scanResult = await simulateScan(
       url,
@@ -43,12 +48,19 @@ const Index = () => {
     setIsScanning(false);
   }, []);
 
+  const filteredVulns = result?.vulnerabilities
+    .filter((v) => severityFilter === "all" || v.severity === severityFilter)
+    .sort((a, b) => {
+      const order = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
+      return order[a.severity] - order[b.severity];
+    }) ?? [];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border">
         <div className="container max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-primary" />
+          <Shield className="w-5 h-5 text-success" />
           <span className="font-display font-semibold text-foreground tracking-tight">WebGuard</span>
           <span className="text-xs text-muted-foreground font-mono ml-1">v1.0</span>
         </div>
@@ -74,6 +86,9 @@ const Index = () => {
               </p>
               <div className="pt-4">
                 <ScanInput onScan={handleScan} isScanning={isScanning} />
+              </div>
+              <div className="pt-2">
+                <FeaturePills />
               </div>
             </motion.div>
           )}
@@ -120,12 +135,28 @@ const Index = () => {
               {/* Scan bar stays at top */}
               <ScanInput onScan={handleScan} isScanning={isScanning} />
 
-              {/* Result summary */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-                <span>Found {result.vulnerabilities.length} vulnerabilities in {result.scanTime.toFixed(1)}s</span>
+              {/* Scan metadata */}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground font-mono">
+                <span className="flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" />
+                  <span className="truncate max-w-xs">{result.url}</span>
+                </span>
                 <span className="text-border">|</span>
-                <span className="truncate">{result.url}</span>
+                <span className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5" />
+                  HTTP 200
+                </span>
+                <span className="text-border">|</span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  {result.scanTime.toFixed(1)}s
+                </span>
+                <span className="text-border">|</span>
+                <span>{result.vulnerabilities.length} findings</span>
               </div>
+
+              {/* Severity summary cards */}
+              <SeveritySummary vulnerabilities={result.vulnerabilities} />
 
               {/* Dashboard grid */}
               <motion.div
@@ -136,18 +167,22 @@ const Index = () => {
               >
                 {/* Vulnerability Feed - 2 cols */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 space-y-3">
-                  <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                    Vulnerability Feed
-                  </h2>
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                      Vulnerability Feed
+                    </h2>
+                    <SeverityFilter active={severityFilter} onChange={setSeverityFilter} />
+                  </div>
                   <div className="space-y-2">
-                    {result.vulnerabilities
-                      .sort((a, b) => {
-                        const order = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
-                        return order[a.severity] - order[b.severity];
-                      })
-                      .map((vuln) => (
+                    {filteredVulns.length > 0 ? (
+                      filteredVulns.map((vuln) => (
                         <VulnerabilityCard key={vuln.id} vuln={vuln} />
-                      ))}
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground font-mono py-8 text-center">
+                        No findings match this filter.
+                      </p>
+                    )}
                   </div>
                 </motion.div>
 

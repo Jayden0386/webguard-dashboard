@@ -8,15 +8,18 @@ interface SecurityScoreProps {
   scanTime: number;
 }
 
+// v2 spec: green (80+), blue (65-79), orange (40-64), red (<40)
 function getScoreColor(score: number) {
-  if (score >= 80) return "hsl(var(--success))";
-  if (score >= 50) return "hsl(var(--warning))";
-  return "hsl(var(--destructive))";
+  if (score >= 80) return "hsl(var(--score-good))";
+  if (score >= 65) return "hsl(var(--score-fair))";
+  if (score >= 40) return "hsl(var(--score-warn))";
+  return "hsl(var(--score-critical))";
 }
 
 function getScoreLabel(score: number) {
   if (score >= 80) return "Good";
-  if (score >= 50) return "Fair";
+  if (score >= 65) return "Fair";
+  if (score >= 40) return "Warning";
   return "Critical";
 }
 

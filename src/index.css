@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,57 +6,65 @@
 
 @layer base {
   :root {
-    --background: 240 6% 14%;
-    --foreground: 240 5% 90%;
+    --background: 228 12% 10%;
+    --foreground: 220 10% 90%;
 
-    --card: 240 5% 18%;
-    --card-foreground: 240 5% 90%;
+    --card: 228 10% 14%;
+    --card-foreground: 220 10% 90%;
 
-    --popover: 240 5% 18%;
-    --popover-foreground: 240 5% 90%;
+    --popover: 228 10% 14%;
+    --popover-foreground: 220 10% 90%;
 
-    --primary: 255 70% 58%;
+    --primary: 259 58% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4% 22%;
-    --secondary-foreground: 240 5% 80%;
+    --secondary: 228 8% 20%;
+    --secondary-foreground: 220 10% 80%;
 
-    --muted: 240 4% 22%;
-    --muted-foreground: 240 5% 55%;
+    --muted: 228 8% 20%;
+    --muted-foreground: 220 8% 55%;
 
-    --accent: 240 4% 26%;
-    --accent-foreground: 240 5% 90%;
+    --accent: 228 8% 24%;
+    --accent-foreground: 220 10% 90%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 150 50% 45%;
-    --success-foreground: 150 50% 90%;
+    --success: 160 100% 45%;
+    --success-foreground: 160 100% 95%;
 
     --warning: 40 80% 55%;
     --warning-foreground: 40 80% 95%;
 
-    --border: 240 5% 25%;
-    --input: 240 5% 22%;
-    --ring: 255 70% 58%;
+    --info: 210 60% 55%;
+    --info-foreground: 210 60% 95%;
+
+    --score-good: 160 100% 45%;
+    --score-fair: 210 70% 55%;
+    --score-warn: 30 85% 55%;
+    --score-critical: 0 72% 55%;
+
+    --border: 228 8% 22%;
+    --input: 228 8% 18%;
+    --ring: 259 58% 56%;
 
     --radius: 0.75rem;
 
     --shadow-layered: 0 1px 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.06);
     --shadow-elevated: 0 4px 12px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.12);
 
-    --font-display: 'Geist Sans', 'Hanken Grotesk', system-ui, sans-serif;
-    --font-body: 'Hanken Grotesk', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-display: 'DM Sans', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'Space Mono', monospace;
 
-    --sidebar-background: 240 6% 12%;
-    --sidebar-foreground: 240 5% 80%;
-    --sidebar-primary: 255 70% 58%;
+    --sidebar-background: 228 12% 8%;
+    --sidebar-foreground: 220 10% 80%;
+    --sidebar-primary: 259 58% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 20%;
-    --sidebar-accent-foreground: 240 5% 90%;
-    --sidebar-border: 240 5% 20%;
-    --sidebar-ring: 255 70% 58%;
+    --sidebar-accent: 228 8% 18%;
+    --sidebar-accent-foreground: 220 10% 90%;
+    --sidebar-border: 228 8% 18%;
+    --sidebar-ring: 259 58% 56%;
   }
 }
 
@@ -83,7 +91,7 @@
 @layer utilities {
   .text-gradient-primary {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(260 80% 72%));
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(280 70% 68%));
   }
 
   .surface-card {
