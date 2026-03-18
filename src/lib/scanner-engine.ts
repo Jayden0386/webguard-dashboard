@@ -97,6 +97,15 @@ const VULNERABILITY_TEMPLATES: Vulnerability[] = [
     evidence: "Set-Cookie: session=abc123; Path=/\n  ❌ Missing: Secure flag\n  ❌ Missing: HttpOnly flag\n  ❌ Missing: SameSite attribute",
     remediation: "Set cookies with Secure, HttpOnly, and SameSite=Strict flags: Set-Cookie: session=abc123; Path=/; Secure; HttpOnly; SameSite=Strict"
   },
+  {
+    id: "open-redirect",
+    title: "Open Redirect Vulnerability",
+    severity: "medium",
+    category: "redirect",
+    description: "The application contains links or parameters that could redirect users to arbitrary external URLs. Attackers can exploit this for phishing by crafting URLs that appear to come from the trusted domain.",
+    evidence: "GET /redirect?url=https://evil.com → 302 Found\nLocation: https://evil.com\nNo validation of redirect target",
+    remediation: "Validate all redirect URLs against an allowlist of trusted domains. Avoid using user-supplied input for redirect targets. If redirects are necessary, use a mapping of allowed redirect IDs instead of raw URLs."
+  },
 ];
 
 function pickRandomVulnerabilities(): Vulnerability[] {

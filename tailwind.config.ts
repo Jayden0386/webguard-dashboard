@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Geist Sans', 'Hanken Grotesk', 'system-ui', 'sans-serif'],
-        body: ['Hanken Grotesk', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        display: ['DM Sans', 'system-ui', 'sans-serif'],
+        body: ['DM Sans', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -43,6 +43,10 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
