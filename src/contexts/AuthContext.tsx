@@ -16,7 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isOwner: boolean;
   owner2faVerified: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; requiresOtp?: boolean; error?: string }>;
+  login: (username: string, password: string) => Promise<{ success: boolean; requiresOtp?: boolean; error?: string }>;
   register: (username: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   acceptDisclaimer: () => void;
@@ -27,9 +27,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Simulated user store
+// Simulated user store (keyed by username)
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
-  "admin@webguard.local": {
+  "webguard_owner": {
     password: "Owner@2024!",
     user: {
       id: "owner-001",
@@ -44,8 +44,8 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
   },
 };
 
-const BANNED_EMAILS = new Set<string>();
-const OWNER_TOTP_CODE = "123456"; // Simulated — in production this is pyotp
+const BANNED_USERNAMES = new Set<string>();
+const OWNER_TOTP_CODE = "123456";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -53,33 +53,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [failedLoginAttempts, setFailedLoginAttempts] = useState(0);
   const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
-  const login = useCallback(async (email: string, password: string) => {
-    // Check lockout
+  const login = useCallback(async (username: string, password: string) => {
     if (lockoutUntil && Date.now() < lockoutUntil) {
       const mins = Math.ceil((lockoutUntil - Date.now()) / 60000);
-      return { success: false, error: `Account locked. Try again in ${mins} minute(s).` };
+      return { success: false, error: `Account temporarily locked. Try again in ${mins} minute(s).` };
     }
 
-    if (BANNED_EMAILS.has(email)) {
+    if (BANNED_USERNAMES.has(username)) {
       return { success: false, error: "Your account has been suspended. Contact support if you believe this is an error." };
     }
 
-    await new Promise((r) => setTimeout(r, 500)); // Simulate latency
+    await new Promise((r) => setTimeout(r, 500));
 
-    const record = MOCK_USERS[email];
+    const record = MOCK_USERS[username];
     if (!record || record.password !== password) {
       const attempts = failedLoginAttempts + 1;
       setFailedLoginAttempts(attempts);
 
       if (attempts >= 10) {
-        BANNED_EMAILS.add(email);
+        BANNED_USERNAMES.add(username);
         return { success: false, error: "Your account has been suspended. Contact support if you believe this is an error." };
       }
       if (attempts >= 5) {
         setLockoutUntil(Date.now() + 15 * 60 * 1000);
-        return { success: false, error: "Too many failed attempts. Account locked for 15 minutes." };
+        return { success: false, error: "Account temporarily locked. Try again in 15 minutes." };
       }
-      return { success: false, error: "Invalid email or password." };
+      return { success: false, error: "Invalid credentials" };
     }
 
     setFailedLoginAttempts(0);
@@ -95,20 +94,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [failedLoginAttempts, lockoutUntil]);
 
   const register = useCallback(async (username: string, email: string, password: string) => {
-    if (BANNED_EMAILS.has(email)) {
-      return { success: false, error: "Registration is not available for this email." };
+    if (BANNED_USERNAMES.has(username)) {
+      return { success: false, error: "Registration is not available." };
     }
 
-    // Password strength check
     if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*]/.test(password)) {
       return { success: false, error: "Password must be 8+ chars with uppercase, number, and special character." };
     }
 
-    if (MOCK_USERS[email]) {
-      return { success: false, error: "An account with this email already exists." };
+    if (MOCK_USERS[username]) {
+      return { success: false, error: "This username is already taken." };
     }
 
-    // Impersonation check
     if (username.toLowerCase() === "webguard_owner" || username.toLowerCase() === "admin") {
       return { success: false, error: "This username is not available." };
     }
@@ -126,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       scanCount: 0,
     };
 
-    MOCK_USERS[email] = { password, user: newUser };
+    MOCK_USERS[username] = { password, user: newUser };
     setUser(newUser);
     return { success: true };
   }, []);
@@ -140,8 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) {
       const updated = { ...user, disclaimerAccepted: true };
       setUser(updated);
-      if (MOCK_USERS[user.email]) {
-        MOCK_USERS[user.email].user = updated;
+      if (MOCK_USERS[user.username]) {
+        MOCK_USERS[user.username].user = updated;
       }
     }
   }, [user]);

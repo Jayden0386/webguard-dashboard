@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Shield, Users, Ban, AlertTriangle, Activity, LogOut, ShieldOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,19 +25,20 @@ const MOCK_BANNED_IPS = [
 const OwnerBans = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-warning" />
-            <span className="font-display font-semibold text-foreground">WebGuard</span>
-            <span className="px-2 py-0.5 rounded-full bg-warning/15 text-warning text-xs font-mono font-medium">OWNER</span>
+            <Shield className="w-5 h-5 text-destructive" />
+            <span className="font-display font-bold text-foreground">WebGuard</span>
+            <span className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-mono font-bold uppercase">Owner Panel</span>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={() => navigate("/dashboard")} className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors">Scanner</button>
-            <button onClick={() => { logout(); navigate("/"); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => { logout(); navigate("/"); }} className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="w-3.5 h-3.5" /> Logout
             </button>
           </div>
@@ -48,7 +48,7 @@ const OwnerBans = () => {
       <div className="container max-w-6xl mx-auto px-6 py-6">
         <div className="flex gap-1 mb-8 overflow-x-auto">
           {navItems.map((item) => (
-            <Link key={item.to} to={item.to} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.to ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent/30"}`}>
+            <Link key={item.to} to={item.to} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-display font-medium transition-colors ${location.pathname === item.to ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent/30"}`}>
               <item.icon className="w-4 h-4" /> {item.label}
             </Link>
           ))}
@@ -57,7 +57,7 @@ const OwnerBans = () => {
         <div className="space-y-8">
           {/* Banned Users */}
           <div className="space-y-4">
-            <h2 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
+            <h2 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
               <Ban className="w-5 h-5 text-destructive" />
               Banned Accounts ({MOCK_BANS.length})
             </h2>
@@ -66,20 +66,20 @@ const OwnerBans = () => {
                 <div key={ban.id} className="surface-card p-5 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-foreground font-mono">{ban.username}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{ban.email} • IP {ban.ip}</p>
+                      <p className="font-medium font-mono text-foreground">{ban.username}</p>
+                      <p className="text-xs font-body text-muted-foreground mt-1">{ban.email} • IP {ban.ip}</p>
                     </div>
                     <span className="px-2.5 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs font-mono font-medium">
                       {ban.attackType}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
+                    <span className="font-body text-muted-foreground">
                       <span className="text-destructive font-medium">Reason:</span> {ban.reason}
                     </span>
                     <span className="text-muted-foreground font-mono">{ban.bannedAt} • by {ban.bannedBy}</span>
                   </div>
-                  <button className="text-xs text-warning hover:text-warning/80 font-medium transition-colors flex items-center gap-1.5">
+                  <button className="text-xs text-warning hover:text-warning/80 font-body font-medium transition-colors flex items-center gap-1.5">
                     <ShieldOff className="w-3.5 h-3.5" />
                     Lift Ban (requires 2FA re-verification)
                   </button>
@@ -90,24 +90,24 @@ const OwnerBans = () => {
 
           {/* Banned IPs */}
           <div className="space-y-4">
-            <h2 className="text-lg font-display font-semibold text-foreground">
+            <h2 className="text-lg font-display font-bold text-foreground">
               Blacklisted IPs ({MOCK_BANNED_IPS.length})
             </h2>
             <div className="surface-card overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase">IP Address</th>
-                    <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase">Reason</th>
-                    <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase">Banned At</th>
+                    <th className="text-left p-4 text-xs font-display text-muted-foreground uppercase">IP Address</th>
+                    <th className="text-left p-4 text-xs font-display text-muted-foreground uppercase">Reason</th>
+                    <th className="text-left p-4 text-xs font-display text-muted-foreground uppercase">Banned At</th>
                   </tr>
                 </thead>
                 <tbody>
                   {MOCK_BANNED_IPS.map((ip) => (
                     <tr key={ip.ip} className="border-b border-border last:border-0">
                       <td className="p-4 font-mono text-foreground">{ip.ip}</td>
-                      <td className="p-4 text-muted-foreground">{ip.reason}</td>
-                      <td className="p-4 text-muted-foreground font-mono text-xs">{ip.bannedAt}</td>
+                      <td className="p-4 font-body text-muted-foreground">{ip.reason}</td>
+                      <td className="p-4 font-mono text-xs text-muted-foreground">{ip.bannedAt}</td>
                     </tr>
                   ))}
                 </tbody>

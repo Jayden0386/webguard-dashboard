@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Disclaimer from "./pages/Disclaimer";
 import Dashboard from "./pages/Dashboard";
+import HistoryVerify from "./pages/HistoryVerify";
+import ScanHistory from "./pages/ScanHistory";
 import OwnerVerify2fa from "./pages/OwnerVerify2fa";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import OwnerUsers from "./pages/owner/OwnerUsers";
@@ -32,11 +34,13 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Disclaimer (auth required, but disclaimer NOT yet accepted) */}
+            {/* Disclaimer (auth required, disclaimer NOT yet accepted) */}
             <Route path="/disclaimer" element={<DisclaimerRoute><Disclaimer /></DisclaimerRoute>} />
 
             {/* Protected routes (auth + disclaimer required) */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/history/verify" element={<ProtectedRoute><HistoryVerify /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><ScanHistory /></ProtectedRoute>} />
 
             {/* Owner 2FA verification */}
             <Route path="/owner/verify-2fa" element={<OwnerVerify2fa />} />
