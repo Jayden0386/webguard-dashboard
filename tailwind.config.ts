@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Space Mono', 'monospace'],
         body: ['DM Sans', 'system-ui', 'sans-serif'],
         mono: ['Space Mono', 'monospace'],
       },
