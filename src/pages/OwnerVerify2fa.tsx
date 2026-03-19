@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Shield, Loader2, AlertTriangle, Clock } from "lucide-react";
@@ -14,18 +14,20 @@ const OwnerVerify2fa = () => {
   const [countdown, setCountdown] = useState(30);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  if (!isAuthenticated || !isOwner) {
-    navigate("/login", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated || !isOwner) {
+      navigate("/login", { replace: true });
+    }
+  }, [isAuthenticated, isOwner, navigate]);
 
-  // Countdown timer
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
     }, 1000);
     return () => clearInterval(timer);
-  });
+  }, []);
+
+  if (!isAuthenticated || !isOwner) return null;
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
