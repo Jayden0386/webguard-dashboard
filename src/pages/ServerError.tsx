@@ -1,25 +1,24 @@
-import { Link } from "react-router-dom";
 import { Shield } from "lucide-react";
 
-const NotFound = () => {
+const ServerError = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
       <div className="text-center space-y-6">
-        <Shield className="w-12 h-12 text-muted-foreground mx-auto" />
-        <h1 className="text-6xl font-display font-bold text-foreground">404</h1>
-        <p className="text-lg font-body text-muted-foreground">Page Not Found</p>
+        <Shield className="w-12 h-12 text-destructive mx-auto" />
+        <h1 className="text-6xl font-display font-bold text-foreground">500</h1>
+        <p className="text-lg font-body text-muted-foreground">Something went wrong</p>
         <p className="text-sm font-body text-muted-foreground max-w-sm">
-          The page you're looking for doesn't exist or has been moved.
+          An unexpected error occurred. Please try again later.
         </p>
-        <Link
-          to="/"
+        <a
+          href="/"
           className="inline-block px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-body font-medium hover:bg-primary/90 transition-colors"
         >
           Go Home
-        </Link>
+        </a>
       </div>
     </div>
   );
 };
 
-export default NotFound;
+export default ServerError;

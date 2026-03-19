@@ -10,8 +10,17 @@ import { SeverityFilter } from "@/components/SeverityFilter";
 import { SeveritySummary } from "@/components/SeveritySummary";
 import { simulateScan } from "@/lib/scanner-engine";
 import { type ScanResult, type ScanLog, type Severity } from "@/lib/scanner-types";
-import { Shield, Clock, Globe, Activity, LogOut, History, User } from "lucide-react";
+import { Shield, Clock, Globe, Activity, LogOut, User, FileDown, History } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+
+const SCAN_STATUS_MESSAGES = [
+  "Connecting to target...",
+  "Checking security headers...",
+  "Scanning for XSS...",
+  "Analyzing cookies...",
+  "Running deep scan...",
+  "Generating report...",
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,7 +40,7 @@ const Dashboard = () => {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [severityFilter, setSeverityFilter] = useState<Severity | "all">("all");
-  const [scanHistory, setScanHistory] = useState<ScanResult[]>([]);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const handleLogout = () => {
     logout();
@@ -39,7 +48,7 @@ const Dashboard = () => {
   };
 
   const handleScan = useCallback(async (url: string) => {
-    // SSRF protection — block internal IPs
+    // SSRF protection
     const ssrfPatterns = [/^https?:\/\/(127\.\d+\.\d+\.\d+)/, /^https?:\/\/(10\.\d+)/, /^https?:\/\/(192\.168\.)/, /^https?:\/\/(172\.(1[6-9]|2\d|3[01]))/, /^https?:\/\/localhost/i];
     if (ssrfPatterns.some((p) => p.test(url))) {
       alert("⚠ Scanning internal network addresses is not allowed.");
@@ -52,14 +61,21 @@ const Dashboard = () => {
     setResult(null);
     setSeverityFilter("all");
 
+    // Cycle status messages
+    let msgIdx = 0;
+    const statusInterval = setInterval(() => {
+      setStatusMessage(SCAN_STATUS_MESSAGES[msgIdx % SCAN_STATUS_MESSAGES.length]);
+      msgIdx++;
+    }, 1500);
+
     const scanResult = await simulateScan(
       url,
       (log) => setLogs((prev) => [...prev, log]),
       (pct) => setProgress(pct)
     );
 
+    clearInterval(statusInterval);
     setResult(scanResult);
-    setScanHistory((prev) => [scanResult, ...prev].slice(0, 20));
     setIsScanning(false);
   }, []);
 
@@ -77,8 +93,8 @@ const Dashboard = () => {
         <div className="container max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-success" />
-            <span className="font-display font-semibold text-foreground tracking-tight">WebGuard</span>
-            <span className="text-xs text-muted-foreground font-mono ml-1">v2.0</span>
+            <span className="font-display font-bold text-foreground">WebGuard</span>
+            <span className="px-2 py-0.5 rounded-full bg-secondary text-muted-foreground text-[10px] font-mono">v1.0</span>
           </div>
           <div className="flex items-center gap-4">
             {isOwner && (
@@ -95,7 +111,7 @@ const Dashboard = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-foreground transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               Logout
@@ -107,6 +123,7 @@ const Dashboard = () => {
       {/* Main content */}
       <section className="container max-w-6xl mx-auto px-6">
         <AnimatePresence mode="wait">
+          {/* Hero state — before scan */}
           {!result && !isScanning && (
             <motion.div
               key="hero"
@@ -116,11 +133,11 @@ const Dashboard = () => {
               transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
               className="py-20 text-center space-y-6"
             >
-              <h1 className="text-4xl md:text-5xl font-display font-semibold text-foreground tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
                 Audit your perimeter.
               </h1>
-              <p className="text-muted-foreground text-lg max-w-lg mx-auto leading-relaxed">
-                Scan any URL for security vulnerabilities. Surface and deep scans with actionable remediation.
+              <p className="text-muted-foreground text-lg font-body max-w-lg mx-auto leading-relaxed">
+                Scan any URL for security vulnerabilities. Get actionable remediation in seconds.
               </p>
               <div className="pt-4">
                 <ScanInput onScan={handleScan} isScanning={isScanning} />
@@ -128,29 +145,10 @@ const Dashboard = () => {
               <div className="pt-2">
                 <FeaturePills />
               </div>
-
-              {/* Recent scan history */}
-              {scanHistory.length > 0 && (
-                <div className="pt-8 max-w-md mx-auto text-left">
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
-                    <History className="w-3.5 h-3.5" />
-                    Recent Scans
-                  </h3>
-                  <div className="space-y-1.5">
-                    {scanHistory.slice(0, 5).map((s, i) => (
-                      <div key={i} className="surface-card px-4 py-2.5 flex items-center justify-between text-xs font-mono">
-                        <span className="text-foreground truncate max-w-[200px]">{s.url}</span>
-                        <span className={`font-semibold ${s.score >= 80 ? "text-success" : s.score >= 40 ? "text-warning" : "text-destructive"}`}>
-                          {s.score}/100
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </motion.div>
           )}
 
+          {/* Scanning state */}
           {isScanning && (
             <motion.div
               key="scanning"
@@ -159,11 +157,13 @@ const Dashboard = () => {
               exit={{ opacity: 0 }}
               className="py-16 space-y-6"
             >
-              <div className="max-w-2xl mx-auto">
-                <ScanInput onScan={handleScan} isScanning={isScanning} />
-              </div>
-              <div className="max-w-2xl mx-auto">
-                <div className="h-1 bg-border rounded-full overflow-hidden">
+              <div className="max-w-2xl mx-auto text-center space-y-4">
+                <div className="flex items-center justify-center gap-3">
+                  <Shield className="w-6 h-6 text-primary animate-spin-slow" />
+                  <span className="font-display font-bold text-lg text-foreground">Scanning...</span>
+                </div>
+                <p className="text-sm font-mono text-success scan-pulse">{statusMessage}</p>
+                <div className="h-1 bg-secondary rounded-full overflow-hidden">
                   <motion.div
                     className="h-full bg-primary rounded-full"
                     initial={{ width: "0%" }}
@@ -171,12 +171,13 @@ const Dashboard = () => {
                     transition={{ duration: 0.3, ease: "easeOut" }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 text-right font-mono">{Math.round(progress)}%</p>
+                <p className="text-xs text-muted-foreground font-mono text-right">{Math.round(progress)}%</p>
               </div>
               <ScanTerminal logs={logs} />
             </motion.div>
           )}
 
+          {/* Results state */}
           {result && !isScanning && (
             <motion.div
               key="results"
@@ -185,8 +186,10 @@ const Dashboard = () => {
               transition={{ duration: 0.3 }}
               className="py-8 space-y-6"
             >
+              {/* Collapsed hero with scan input */}
               <ScanInput onScan={handleScan} isScanning={isScanning} />
 
+              {/* Scan metadata row */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground font-mono">
                 <span className="flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5" />
@@ -206,6 +209,7 @@ const Dashboard = () => {
                 <span>{result.vulnerabilities.length} findings</span>
               </div>
 
+              {/* Severity summary */}
               <SeveritySummary vulnerabilities={result.vulnerabilities} />
 
               <motion.div
@@ -214,9 +218,10 @@ const Dashboard = () => {
                 animate="show"
                 className="grid grid-cols-1 lg:grid-cols-3 gap-6"
               >
+                {/* Findings list */}
                 <motion.div variants={itemVariants} className="lg:col-span-2 space-y-3">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Vulnerability Feed</h2>
+                    <h2 className="text-sm font-display font-medium text-muted-foreground uppercase tracking-wider">Findings</h2>
                     <SeverityFilter active={severityFilter} onChange={setSeverityFilter} />
                   </div>
                   <div className="space-y-2">
@@ -227,6 +232,8 @@ const Dashboard = () => {
                     )}
                   </div>
                 </motion.div>
+
+                {/* Score ring */}
                 <motion.div variants={itemVariants}>
                   <SecurityScore
                     score={result.score}
@@ -237,6 +244,21 @@ const Dashboard = () => {
                   />
                 </motion.div>
               </motion.div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-3 pt-4">
+                <button
+                  onClick={() => navigate("/history/verify")}
+                  className="flex items-center gap-2 px-5 py-2.5 border border-border rounded-lg text-sm font-body text-foreground hover:bg-accent transition-colors"
+                >
+                  <History className="w-4 h-4" />
+                  View My Scan History
+                </button>
+                <button className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-body font-medium hover:bg-primary/90 transition-colors">
+                  <FileDown className="w-4 h-4" />
+                  Download PDF Report
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -245,7 +267,7 @@ const Dashboard = () => {
       {/* Footer */}
       <footer className="border-t border-border mt-8 py-4">
         <p className="text-center text-xs text-muted-foreground font-mono">
-          ⚠ Only scan websites you own or have explicit permission to test.
+          WebGuard Scanner — For educational use only
         </p>
       </footer>
     </div>
