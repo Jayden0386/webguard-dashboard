@@ -15,7 +15,7 @@ Open/exposed directories
 Outdated server info disclosure
 
 WebGuard knows HOW each tool attacks, it can check if your site is vulnerable to those exact attack methods and tell you how to stop them.
-What you're describing is called "Offensive-Defensive Security"
+ "Offensive-Defensive Security"
 
 Here's what each tool looks for and how WebGuard can mirror it:
 Nmap — scans for open ports and running services. WebGuard can check what ports and services are exposed and flag dangerous ones like port 21 (FTP), 23 (Telnet), 3306 (MySQL exposed publicly).
