@@ -1,6 +1,6 @@
 import { type ScanResult } from "./scanner-types";
 
-const API_BASE = "/api";
+const API_BASE = const API_BASE = "https://tobie-glucosic-subfrontally.ngrok-free.dev/api";
 
 // Helper for API calls with error handling
 async function apiCall<T>(url: string, options?: RequestInit): Promise<{ data?: T; error?: string }> {
