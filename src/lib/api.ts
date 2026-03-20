@@ -5,8 +5,9 @@ const API_BASE = const API_BASE = "https://tobie-glucosic-subfrontally.ngrok-fre
 // Helper for API calls with error handling
 async function apiCall<T>(url: string, options?: RequestInit): Promise<{ data?: T; error?: string }> {
   try {
-    const res = await fetch(`${API_BASE}${url}`, {
+   const res = await fetch(`${API_BASE}${url}`, {
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       ...options,
     });
     const json = await res.json();
@@ -20,9 +21,8 @@ async function apiCall<T>(url: string, options?: RequestInit): Promise<{ data?: 
 
 // Auth
 export const api = {
-  login: (username: string, password: string) =>
-    apiCall("/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }),
-
+login: (email: string, password: string) =>
+    apiCall("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   register: (name: string, email: string, username: string, password: string) =>
     apiCall("/auth/register", { method: "POST", body: JSON.stringify({ name, email, username, password }) }),
 
